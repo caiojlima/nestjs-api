@@ -1,7 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { writeFile, readFileSync } from 'fs';
 import { UserModel } from './models/user.model';
-import e from 'express';
 
 export class UserRepository {
     
