@@ -1,31 +1,50 @@
 import { BadRequestException } from '@nestjs/common';
 import { writeFile, readFileSync } from 'fs';
 import { UserModel } from './models/user.model';
+import e from 'express';
 
 export class UserRepository {
     
     private DB_PATH: string = './src/database/database.json';
 
-    public getAllUsers = (): UserModel[] => JSON.parse(readFileSync(this.DB_PATH).toString());
+    public findAll = (): UserModel[] => JSON.parse(readFileSync(this.DB_PATH).toString());
 
-    public getUserById = (id: number): UserModel => {
-        const db = this.getAllUsers();
+    public findById = (id: number): UserModel => {
+        const db = this.findAll();
         return db.find((model: UserModel) => model.id === id);
     }
 
 
-    public createUser = (data: UserModel): void => {
-        const db = this.getAllUsers();
+    public save = (data: UserModel): void => {
+        let db = this.findAll();
+        console.log({data});
         
-        data.id = this.autoIncrementHandler(db);
+        if (data.id) {
+            db = db.map((model: UserModel) => model.id === data.id ? data : model);
+        } else {
+            data.id = this.autoIncrementHandler(db);
 
-        db.push({
-            id: data.id,
-            name: data.name,
-            email: data.email,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt
-        } as UserModel);
+            db.push({
+                id: data.id,
+                name: data.name,
+                email: data.email,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt
+            } as UserModel);
+        }
+
+        writeFile(this.DB_PATH, JSON.stringify(db), (err) => {
+            if (err) {
+                throw new BadRequestException();
+            }
+        });
+        
+    }
+
+    public updateUser = (id: number, userModel: UserModel) => {
+        const db = this.findAll();
+
+        db.map((model: UserModel) => model.id === id ? userModel : model)
 
         writeFile(this.DB_PATH, JSON.stringify(db), (err) => {
             if (err) {
