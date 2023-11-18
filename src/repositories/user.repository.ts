@@ -2,34 +2,37 @@ import { BadRequestException } from '@nestjs/common';
 import { writeFile, readFileSync } from 'fs';
 import { UserModel } from './models/user.model';
 
-const DB_PATH = './src/database/database.json';
-
-export const getAllUsers = (): UserModel[] => JSON.parse(readFileSync(DB_PATH).toString());
-
-export const getUserById = (id: number): UserModel => {
-    const db = getAllUsers();
-    return db.find((model: UserModel) => model.id === id);
-}
-
-
-export const createUser = (data: UserModel): void => {
-    const db = getAllUsers();
+export class UserRepository {
     
-    data.id = autoIncrementHandler(db);
+    private DB_PATH: string = './src/database/database.json';
 
-    db.push({
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt
-    } as UserModel);
+    public getAllUsers = (): UserModel[] => JSON.parse(readFileSync(this.DB_PATH).toString());
 
-    writeFile(DB_PATH, JSON.stringify(db), (err) => {
-        if (err) {
-            throw new BadRequestException();
-        }
-      });
+    public getUserById = (id: number): UserModel => {
+        const db = this.getAllUsers();
+        return db.find((model: UserModel) => model.id === id);
+    }
+
+
+    public createUser = (data: UserModel): void => {
+        const db = this.getAllUsers();
+        
+        data.id = this.autoIncrementHandler(db);
+
+        db.push({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt
+        } as UserModel);
+
+        writeFile(this.DB_PATH, JSON.stringify(db), (err) => {
+            if (err) {
+                throw new BadRequestException();
+            }
+        });
+    }
+
+    private autoIncrementHandler = (db: UserModel[]): number => db.length ? db[db.length - 1].id + 1 : 1;
 }
-
-const autoIncrementHandler = (db: UserModel[]): number => db.length ? db[db.length - 1].id + 1 : 1;
