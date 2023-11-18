@@ -1,19 +1,19 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { AppService } from './app.service';
-import { UserDTO } from './user.dto';
-import { UserRequestDTO } from './user.request';
+import { AppService } from '../services/app.service';
+import { UserModel } from '../user.model';
+import { UserRequestDTO } from '../user.request';
 
 @Controller('users')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getAll(): UserDTO[] {
+  getAll(): UserModel[] {
     return this.appService.getAll();
   }
 
   @Post()
-  create(@Body() requestBody: UserRequestDTO): UserDTO {
+  create(@Body() requestBody: UserRequestDTO): UserModel {
     return this.appService.create(requestBody);
   }
 }
