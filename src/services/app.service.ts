@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from '../user.model';
-import { UserRequestDTO } from '../user.request';
-import { readDatabaseFile, writeOnDatabaseFile } from '../database/database.repository';
+import { UserModel } from '../repositories/models/user.model';
+import { UserRequestDTO } from '../controllers/DTOs/requests/user.request.dto';
+import { getAllUsers, createUser } from '../repositories/user.repository';
+import { UserResponseDTO } from 'src/controllers/DTOs/responses/user.response.dto';
 
 @Injectable()
 export class AppService {
-  getAll(): UserModel[] {
-    return readDatabaseFile()
+  getAll(): UserResponseDTO[] {
+    const modelArray: UserModel[] = getAllUsers();
+    return new UserResponseDTO().fromModelArray(modelArray);
   }
-  create(userRequest: UserRequestDTO): UserModel{
+  
+  create(userRequest: UserRequestDTO): UserResponseDTO {
     const currentDate = new Date();
-    const user = new UserModel(userRequest.name, userRequest.email, currentDate, currentDate);
-    writeOnDatabaseFile(user);
-    return user;
+    const userModel = new UserModel(userRequest.name, userRequest.email, currentDate, currentDate);
+    createUser(userModel);
+    return new UserResponseDTO().fromModel(userModel);
   }
 }
