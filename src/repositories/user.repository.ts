@@ -1,12 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
 import { writeFile, readFileSync } from 'fs';
 import { UserModel } from './models/user.model';
+import { BaseRepository } from './base.repository';
 
-export class UserRepository {
-    
-    private DB_PATH: string = './src/database/database.json';
-
-    public findAll = (): UserModel[] => JSON.parse(readFileSync(this.DB_PATH).toString());
+export class UserRepository extends BaseRepository {
+    public findAll = (): UserModel[] => this.DB().Users;
 
     public findById = (id: number): UserModel => {
         const db = this.findAll();
@@ -16,7 +14,6 @@ export class UserRepository {
 
     public save = (data: UserModel): void => {
         let db = this.findAll();
-        console.log({data});
         
         if (data.id) {
             db = db.map((model: UserModel) => model.id === data.id ? data : model);
@@ -32,7 +29,10 @@ export class UserRepository {
             } as UserModel);
         }
 
-        writeFile(this.DB_PATH, JSON.stringify(db), (err) => {
+        const DB_INSTANCE = this.DB()
+        DB_INSTANCE.Users = db;
+
+        writeFile(this.DB_PATH, JSON.stringify(DB_INSTANCE), (err) => {
             if (err) {
                 throw new BadRequestException();
             }
@@ -40,17 +40,4 @@ export class UserRepository {
         
     }
 
-    public updateUser = (id: number, userModel: UserModel) => {
-        const db = this.findAll();
-
-        db.map((model: UserModel) => model.id === id ? userModel : model)
-
-        writeFile(this.DB_PATH, JSON.stringify(db), (err) => {
-            if (err) {
-                throw new BadRequestException();
-            }
-        });
-    }
-
-    private autoIncrementHandler = (db: UserModel[]): number => db.length ? db[db.length - 1].id + 1 : 1;
 }

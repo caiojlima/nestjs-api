@@ -1,4 +1,6 @@
-export class UserModel {
+import { ModelInterface } from "../interfaces/model.interface";
+
+export class UserModel implements ModelInterface {
     #id?: number;
     #name: string;
     #email: string;

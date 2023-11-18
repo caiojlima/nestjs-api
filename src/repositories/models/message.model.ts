@@ -1,6 +1,7 @@
+import { ModelInterface } from "../interfaces/model.interface";
 import { UserModel } from "./user.model";
 
-export class Message {
+export class Message implements ModelInterface {
     #id?: number;
     #sender: UserModel;
     #content: string;
